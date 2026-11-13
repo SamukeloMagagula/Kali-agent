@@ -79,7 +79,11 @@ def main() -> int:
     print("trigger-poll: watching %s every %gs (Ctrl+C to stop)" % (hub_url, poll_s))
     while True:
         try:
-            resp = _request("%s/api/demo/pending" % hub_url, api_key)
+            # Only ever claim the attack scenarios this kit knows how to run: the hub's queue
+            # is shared with Pi-Agents/tools/demo-poll.py's own (unrelated) pi_down/pi_recover
+            # requests, which this box must never see or act on.
+            resp = _request("%s/api/demo/pending?scenarios=recon,brute,breakin,web,all"
+                            % hub_url, api_key)
             pending = resp.get("pending")
             if pending is None:
                 time.sleep(poll_s)
